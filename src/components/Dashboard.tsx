@@ -12,8 +12,8 @@ interface Props {
   profile: TradingProfile;
   entries: DailyEntry[];
   currentBalance: number;
-  onAddEntry: (date: string, profit: number, notes: string) => void;
-  onUpdateEntry: (id: string, updates: { profitAmount?: number; notes?: string; date?: string }) => void;
+  onAddEntry: (date: string, profit: number, notes: string, withdrawal?: number) => void;
+  onUpdateEntry: (id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => void;
   onDeleteEntry: (id: string) => void;
   onUpdateDeposit: (profile: TradingProfile) => void;
   onClearAll: () => void;
@@ -84,8 +84,8 @@ export default function Dashboard({
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         <SummaryCards entries={entries} currentBalance={currentBalance} initialDeposit={profile.initialDeposit} />
-        <TradingCharts entries={entries} initialDeposit={profile.initialDeposit} />
         <EntriesTable entries={entries} onAdd={onAddEntry} onUpdate={onUpdateEntry} onDelete={onDeleteEntry} />
+        <TradingCharts entries={entries} initialDeposit={profile.initialDeposit} />
       </main>
     </div>
   );

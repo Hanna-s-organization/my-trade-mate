@@ -9,19 +9,21 @@ import AddEntryDialog from './AddEntryDialog';
 
 interface Props {
   entries: DailyEntry[];
-  onAdd: (date: string, profit: number, notes: string) => void;
-  onUpdate: (id: string, updates: { profitAmount?: number; notes?: string; date?: string }) => void;
+  onAdd: (date: string, profit: number, notes: string, withdrawal?: number) => void;
+  onUpdate: (id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => void;
   onDelete: (id: string) => void;
 }
 
 export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Props) {
   const [editId, setEditId] = useState<string | null>(null);
   const [editProfit, setEditProfit] = useState('');
+  const [editWithdrawal, setEditWithdrawal] = useState('');
   const [editNotes, setEditNotes] = useState('');
 
   const startEdit = (entry: DailyEntry) => {
     setEditId(entry.id);
     setEditProfit(entry.profitAmount.toString());
+    setEditWithdrawal((entry.withdrawal || 0).toString());
     setEditNotes(entry.notes);
   };
 
@@ -30,14 +32,15 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
   const saveEdit = (id: string) => {
     const val = parseFloat(editProfit);
     if (isNaN(val)) return;
-    onUpdate(id, { profitAmount: val, notes: editNotes });
+    const wd = parseFloat(editWithdrawal) || 0;
+    onUpdate(id, { profitAmount: val, withdrawal: wd, notes: editNotes });
     setEditId(null);
   };
 
   const reversed = [...entries].reverse();
 
   return (
-    <Card className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+    <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <CardTitle className="text-lg">Журнал угод</CardTitle>
         <AddEntryDialog onAdd={onAdd} />
@@ -55,6 +58,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                   <TableHead className="text-xs">Дата</TableHead>
                   <TableHead className="text-xs text-right">Прибуток ($)</TableHead>
                   <TableHead className="text-xs text-right">%</TableHead>
+                  <TableHead className="text-xs text-right">Виведення ($)</TableHead>
                   <TableHead className="text-xs text-right">Баланс</TableHead>
                   <TableHead className="text-xs">Нотатки</TableHead>
                   <TableHead className="text-xs w-20"></TableHead>
@@ -81,6 +85,22 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                     </TableCell>
                     <TableCell className={`text-right font-mono text-xs ${entry.profitPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {entry.profitPercent >= 0 ? '+' : ''}{entry.profitPercent.toFixed(2)}%
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editId === entry.id ? (
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={editWithdrawal}
+                          onChange={e => setEditWithdrawal(e.target.value)}
+                          className="h-7 w-24 font-mono text-xs text-right ml-auto"
+                        />
+                      ) : (
+                        <span className={`font-mono text-xs ${(entry.withdrawal || 0) > 0 ? 'text-warning' : 'text-muted-foreground'}`}>
+                          {(entry.withdrawal || 0) > 0 ? `-${(entry.withdrawal || 0).toFixed(2)}` : '—'}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs">
                       ${entry.endingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}

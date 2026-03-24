@@ -23,18 +23,21 @@ export function generateDemoData(): { profile: TradingProfile; entries: DailyEnt
     const percent = (profit / balance) * 100;
     const ending = balance + profit;
 
+    const withdrawal = (i % 20 === 0 && i > 0) ? Math.round(balance * 0.05 * 100) / 100 : 0;
+
     entries.push({
       id: crypto.randomUUID(),
       date: date.toISOString().split('T')[0],
       profitAmount: profit,
       profitPercent: Math.round(percent * 100) / 100,
+      withdrawal,
       startingBalance: Math.round(balance * 100) / 100,
-      endingBalance: Math.round(ending * 100) / 100,
-      notes: '',
+      endingBalance: Math.round((ending - withdrawal) * 100) / 100,
+      notes: withdrawal > 0 ? 'Виведення коштів' : '',
       createdAt: date.toISOString(),
       updatedAt: date.toISOString(),
     });
-    balance = ending;
+    balance = ending - withdrawal;
   }
 
   return { profile, entries };

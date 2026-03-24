@@ -6,21 +6,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
 
 interface Props {
-  onAdd: (date: string, profit: number, notes: string) => void;
+  onAdd: (date: string, profit: number, notes: string, withdrawal?: number) => void;
 }
 
 export default function AddEntryDialog({ onAdd }: Props) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [profit, setProfit] = useState('');
+  const [withdrawal, setWithdrawal] = useState('');
   const [notes, setNotes] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const val = parseFloat(profit);
     if (isNaN(val)) return;
-    onAdd(date, val, notes);
+    const wd = parseFloat(withdrawal) || 0;
+    onAdd(date, val, notes, wd);
     setProfit('');
+    setWithdrawal('');
     setNotes('');
     setDate(new Date().toISOString().split('T')[0]);
     setOpen(false);
@@ -52,6 +55,18 @@ export default function AddEntryDialog({ onAdd }: Props) {
               onChange={e => setProfit(e.target.value)}
               className="font-mono"
               autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Виведення коштів ($)</label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              value={withdrawal}
+              onChange={e => setWithdrawal(e.target.value)}
+              className="font-mono"
             />
           </div>
           <div className="space-y-2">
