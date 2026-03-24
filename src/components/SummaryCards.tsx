@@ -1,6 +1,6 @@
 import { DailyEntry } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Calendar, BarChart3, Target, Wallet } from 'lucide-react';
+import { TrendingUp, Calendar, BarChart3, Target, Wallet, ArrowDownFromLine } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface Props {
@@ -41,14 +41,17 @@ export default function SummaryCards({ entries, currentBalance, initialDeposit }
     const yearStartBalance = yearEntries.length > 0 ? yearEntries[0].startingBalance : currentBalance;
     const yearPercent = yearStartBalance > 0 ? (yearProfit / yearStartBalance) * 100 : 0;
 
-    const totalProfit = currentBalance - initialDeposit;
+    const totalProfit = entries.reduce((s, e) => s + e.profitAmount, 0);
     const totalPercent = initialDeposit > 0 ? (totalProfit / initialDeposit) * 100 : 0;
 
-    return { todayProfit, todayPercent, monthProfit, monthPercent, yearProfit, yearPercent, totalProfit, totalPercent };
+    const totalWithdrawals = entries.reduce((s, e) => s + (e.withdrawal || 0), 0);
+
+    return { todayProfit, todayPercent, monthProfit, monthPercent, yearProfit, yearPercent, totalProfit, totalPercent, totalWithdrawals };
   }, [entries, currentBalance, initialDeposit]);
 
   const cards = [
     { label: 'Поточний баланс', value: `$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: Wallet, color: 'text-primary' },
+    { label: 'Виведення коштів', value: `$${stats.totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: ArrowDownFromLine, color: stats.totalWithdrawals > 0 ? 'text-warning' : 'text-muted-foreground' },
     { label: 'Заробіток за день', value: formatUSD(stats.todayProfit), sub: formatPercent(stats.todayPercent), icon: Calendar, color: stats.todayProfit >= 0 ? 'text-success' : 'text-destructive' },
     { label: 'Прибуток за місяць', value: formatUSD(stats.monthProfit), sub: formatPercent(stats.monthPercent), icon: BarChart3, color: stats.monthProfit >= 0 ? 'text-success' : 'text-destructive' },
     { label: 'Прибуток за рік', value: formatUSD(stats.yearProfit), sub: formatPercent(stats.yearPercent), icon: TrendingUp, color: stats.yearProfit >= 0 ? 'text-success' : 'text-destructive' },
@@ -56,7 +59,7 @@ export default function SummaryCards({ entries, currentBalance, initialDeposit }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       {cards.map((c, i) => (
         <Card key={i} className="animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
           <CardContent className="p-4 space-y-2">

@@ -84,8 +84,8 @@ export default function Dashboard({
 
       <main className="container mx-auto px-4 py-6 space-y-6">
         <SummaryCards entries={entries} currentBalance={currentBalance} initialDeposit={profile.initialDeposit} />
-        <TradingCharts entries={entries} initialDeposit={profile.initialDeposit} />
         <EntriesTable entries={entries} onAdd={onAddEntry} onUpdate={onUpdateEntry} onDelete={onDeleteEntry} />
+        <TradingCharts entries={entries} initialDeposit={profile.initialDeposit} />
       </main>
     </div>
   );
