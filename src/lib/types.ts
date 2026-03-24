@@ -9,6 +9,7 @@ export interface DailyEntry {
   date: string;
   profitAmount: number;
   profitPercent: number;
+  withdrawal: number;
   startingBalance: number;
   endingBalance: number;
   notes: string;

@@ -36,7 +36,7 @@ export function useTrading() {
     setEntries(recalced);
   }, [profile]);
 
-  const updateEntry = useCallback((id: string, updates: { profitAmount?: number; notes?: string; date?: string }) => {
+  const updateEntry = useCallback((id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => {
     if (!profile) return;
     const allEntries = storage.getEntries().map(e =>
       e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e

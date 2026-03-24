@@ -48,10 +48,11 @@ export function recalculateEntries(initialDeposit: number, entries: DailyEntry[]
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   let balance = initialDeposit;
   return sorted.map(entry => {
+    const withdrawal = entry.withdrawal || 0;
     const startingBalance = balance;
     const profitPercent = startingBalance > 0 ? (entry.profitAmount / startingBalance) * 100 : 0;
-    const endingBalance = startingBalance + entry.profitAmount;
+    const endingBalance = startingBalance + entry.profitAmount - withdrawal;
     balance = endingBalance;
-    return { ...entry, startingBalance, profitPercent, endingBalance };
+    return { ...entry, withdrawal, startingBalance, profitPercent, endingBalance };
   });
 }
