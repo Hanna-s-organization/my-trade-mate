@@ -15,7 +15,7 @@ export function useTrading() {
     setEntries(recalced);
   }, []);
 
-  const addEntry = useCallback((date: string, profitAmount: number, notes: string) => {
+  const addEntry = useCallback((date: string, profitAmount: number, notes: string, withdrawal: number = 0) => {
     if (!profile) return;
     const allEntries = storage.getEntries();
     const newEntry: DailyEntry = {
@@ -23,6 +23,7 @@ export function useTrading() {
       date,
       profitAmount,
       profitPercent: 0,
+      withdrawal,
       startingBalance: 0,
       endingBalance: 0,
       notes,
