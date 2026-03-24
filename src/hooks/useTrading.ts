@@ -53,8 +53,8 @@ export function useTrading() {
     setEntries(recalced);
   }, [profile]);
 
-  const loadDemoData = useCallback(() => {
-    const { generateDemoData } = require('@/lib/demo-data');
+  const loadDemoData = useCallback(async () => {
+    const { generateDemoData } = await import('@/lib/demo-data');
     const { profile: demoProfile, entries: demoEntries } = generateDemoData();
     storage.saveProfile(demoProfile);
     storage.saveEntries(demoEntries);
