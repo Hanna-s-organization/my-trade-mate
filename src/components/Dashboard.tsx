@@ -12,8 +12,8 @@ interface Props {
   profile: TradingProfile;
   entries: DailyEntry[];
   currentBalance: number;
-  onAddEntry: (date: string, profit: number, notes: string) => void;
-  onUpdateEntry: (id: string, updates: { profitAmount?: number; notes?: string; date?: string }) => void;
+  onAddEntry: (date: string, profit: number, notes: string, withdrawal?: number) => void;
+  onUpdateEntry: (id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => void;
   onDeleteEntry: (id: string) => void;
   onUpdateDeposit: (profile: TradingProfile) => void;
   onClearAll: () => void;
