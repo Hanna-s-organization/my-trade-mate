@@ -2,6 +2,8 @@ import { TradingProfile, DailyEntry } from '@/lib/types';
 import SummaryCards from './SummaryCards';
 import TradingCharts from './TradingCharts';
 import EntriesTable from './EntriesTable';
+import ThemeToggle from './ThemeToggle';
+import UserMenu from './UserMenu';
 import { Button } from '@/components/ui/button';
 import { Settings, TrendingUp, Trash2, DollarSign } from 'lucide-react';
 import { useState } from 'react';
@@ -35,7 +37,7 @@ export default function Dashboard({
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
@@ -45,6 +47,7 @@ export default function Dashboard({
             <span className="text-xs text-muted-foreground font-mono hidden sm:block">
               Депозит: ${profile.initialDeposit.toLocaleString()}
             </span>
+            <ThemeToggle />
             <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -78,6 +81,7 @@ export default function Dashboard({
                 </div>
               </DialogContent>
             </Dialog>
+            <UserMenu />
           </div>
         </div>
       </header>

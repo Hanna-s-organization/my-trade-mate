@@ -61,7 +61,7 @@ export default function SummaryCards({ entries, currentBalance, initialDeposit }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       {cards.map((c, i) => (
-        <Card key={i} className="animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
+        <Card key={i} className="animate-fade-in card-elevated" style={{ animationDelay: `${i * 60}ms` }}>
           <CardContent className="p-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>

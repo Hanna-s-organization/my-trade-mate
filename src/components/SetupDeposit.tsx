@@ -3,16 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TradingProfile } from '@/lib/types';
-import { generateDemoData } from '@/lib/demo-data';
-import * as storage from '@/lib/storage';
 import { DollarSign, TrendingUp } from 'lucide-react';
 
 interface Props {
   onSetup: (profile: TradingProfile) => void;
-  onLoadDemo: () => void;
 }
 
-export default function SetupDeposit({ onSetup, onLoadDemo }: Props) {
+export default function SetupDeposit({ onSetup }: Props) {
   const [amount, setAmount] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -27,16 +24,9 @@ export default function SetupDeposit({ onSetup, onLoadDemo }: Props) {
     onSetup(profile);
   };
 
-  const handleDemo = () => {
-    const { profile, entries } = generateDemoData();
-    storage.saveProfile(profile);
-    storage.saveEntries(entries);
-    onLoadDemo();
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md animate-fade-in">
+      <Card className="w-full max-w-md animate-fade-in card-elevated">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
             <TrendingUp className="h-7 w-7 text-primary" />
@@ -68,17 +58,6 @@ export default function SetupDeposit({ onSetup, onLoadDemo }: Props) {
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={!amount || parseFloat(amount) <= 0}>
               Почати
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">або</span>
-              </div>
-            </div>
-            <Button type="button" variant="outline" className="w-full" onClick={handleDemo}>
-              Завантажити демо-дані
             </Button>
           </form>
         </CardContent>
