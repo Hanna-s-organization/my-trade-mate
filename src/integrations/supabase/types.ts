@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      trading_entries: {
+        Row: {
+          created_at: string
+          date: string
+          ending_balance: number
+          id: string
+          notes: string | null
+          profit_amount: number
+          profit_percent: number
+          starting_balance: number
+          updated_at: string
+          user_id: string
+          withdrawal: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          ending_balance?: number
+          id?: string
+          notes?: string | null
+          profit_amount?: number
+          profit_percent?: number
+          starting_balance?: number
+          updated_at?: string
+          user_id: string
+          withdrawal?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          ending_balance?: number
+          id?: string
+          notes?: string | null
+          profit_amount?: number
+          profit_percent?: number
+          starting_balance?: number
+          updated_at?: string
+          user_id?: string
+          withdrawal?: number
+        }
+        Relationships: []
+      }
+      trading_profiles: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          initial_deposit: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          initial_deposit?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          initial_deposit?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
