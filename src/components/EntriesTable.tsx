@@ -40,7 +40,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
   const reversed = [...entries].reverse();
 
   return (
-    <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+    <Card className="animate-fade-in card-elevated" style={{ animationDelay: '200ms' }}>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <CardTitle className="text-lg">Журнал угод</CardTitle>
         <AddEntryDialog onAdd={onAdd} />
@@ -54,7 +54,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   <TableHead className="text-xs">Дата</TableHead>
                   <TableHead className="text-xs text-right">Прибуток ($)</TableHead>
                   <TableHead className="text-xs text-right">%</TableHead>
@@ -66,8 +66,8 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
               </TableHeader>
               <TableBody>
                 {reversed.map(entry => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="font-mono text-xs">{entry.date}</TableCell>
+                  <TableRow key={entry.id} className="transition-colors">
+                    <TableCell className="font-mono text-xs text-foreground">{entry.date}</TableCell>
                     <TableCell className="text-right">
                       {editId === entry.id ? (
                         <Input
@@ -102,7 +102,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-xs">
+                    <TableCell className="text-right font-mono text-xs text-foreground">
                       ${entry.endingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="text-xs max-w-[200px] truncate">
@@ -121,7 +121,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                       <div className="flex gap-1 justify-end">
                         {editId === entry.id ? (
                           <>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => saveEdit(entry.id)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-success hover:text-success" onClick={() => saveEdit(entry.id)}>
                               <Check className="h-3.5 w-3.5" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={cancelEdit}>
@@ -130,10 +130,10 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                           </>
                         ) : (
                           <>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(entry)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => startEdit(entry)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onDelete(entry.id)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => onDelete(entry.id)}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </>
