@@ -45,7 +45,7 @@ export default function Dashboard({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground font-mono hidden sm:block">
-              Депозит: ${profile.initialDeposit.toLocaleString()}
+              Deposit: ${profile.initialDeposit.toLocaleString()}
             </span>
             <ThemeToggle />
             <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
@@ -56,11 +56,11 @@ export default function Dashboard({
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Налаштування</DialogTitle>
+                  <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">Початковий депозит ($)</label>
+                    <label className="text-sm font-medium text-muted-foreground">Initial Deposit ($)</label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -72,10 +72,10 @@ export default function Dashboard({
                       />
                     </div>
                   </div>
-                  <Button onClick={handleSaveDeposit} className="w-full">Зберегти</Button>
+                  <Button onClick={handleSaveDeposit} className="w-full">Save</Button>
                   <div className="pt-4 border-t">
                     <Button variant="destructive" size="sm" className="w-full" onClick={onClearAll}>
-                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Очистити всі дані
+                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear All Data
                     </Button>
                   </div>
                 </div>

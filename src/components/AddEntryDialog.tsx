@@ -33,24 +33,24 @@ export default function AddEntryDialog({ onAdd }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Plus className="h-4 w-4 mr-1" /> Додати запис
+          <Plus className="h-4 w-4 mr-1" /> Add Entry
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Новий торговий день</DialogTitle>
+          <DialogTitle>New Trading Day</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Дата</label>
+            <label className="text-sm font-medium text-muted-foreground">Date</label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Прибуток / Збиток ($)</label>
+            <label className="text-sm font-medium text-muted-foreground">Profit / Loss ($)</label>
             <Input
               type="number"
               step="0.01"
-              placeholder="+150.00 або -50.00"
+              placeholder="+150.00 or -50.00"
               value={profit}
               onChange={e => setProfit(e.target.value)}
               className="font-mono"
@@ -58,7 +58,7 @@ export default function AddEntryDialog({ onAdd }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Виведення коштів ($)</label>
+            <label className="text-sm font-medium text-muted-foreground">Withdrawal ($)</label>
             <Input
               type="number"
               step="0.01"
@@ -70,11 +70,11 @@ export default function AddEntryDialog({ onAdd }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Нотатки</label>
-            <Textarea placeholder="Опціонально..." value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
+            <label className="text-sm font-medium text-muted-foreground">Notes</label>
+            <Textarea placeholder="Optional..." value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
           </div>
           <Button type="submit" className="w-full" disabled={!profit}>
-            Зберегти
+            Save
           </Button>
         </form>
       </DialogContent>

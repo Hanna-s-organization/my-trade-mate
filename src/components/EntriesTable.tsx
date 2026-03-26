@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { DailyEntry } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trash2, Pencil, Check, X, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AddEntryDialog from './AddEntryDialog';
 
@@ -19,6 +20,37 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
   const [editProfit, setEditProfit] = useState('');
   const [editWithdrawal, setEditWithdrawal] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('all');
+
+  const monthOptions = useMemo(() => {
+    const months = new Set<string>();
+    entries.forEach(e => months.add(e.date.slice(0, 7)));
+    return Array.from(months).sort().reverse();
+  }, [entries]);
+
+  const filteredEntries = useMemo(() => {
+    let filtered = entries;
+    if (selectedMonth !== 'all') {
+      filtered = filtered.filter(e => e.date.startsWith(selectedMonth));
+    }
+    if (dateFrom) {
+      filtered = filtered.filter(e => e.date >= dateFrom);
+    }
+    if (dateTo) {
+      filtered = filtered.filter(e => e.date <= dateTo);
+    }
+    return filtered;
+  }, [entries, selectedMonth, dateFrom, dateTo]);
+
+  const clearFilters = () => {
+    setDateFrom('');
+    setDateTo('');
+    setSelectedMonth('all');
+  };
+
+  const hasFilters = dateFrom || dateTo || selectedMonth !== 'all';
 
   const startEdit = (entry: DailyEntry) => {
     setEditId(entry.id);
@@ -37,30 +69,76 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
     setEditId(null);
   };
 
-  const reversed = [...entries].reverse();
+  const reversed = [...filteredEntries].reverse();
 
   return (
     <Card className="animate-fade-in card-elevated" style={{ animationDelay: '200ms' }}>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <CardTitle className="text-lg">Журнал угод</CardTitle>
-        <AddEntryDialog onAdd={onAdd} />
+      <CardHeader className="flex flex-col gap-4 pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Trading Journal</CardTitle>
+          <AddEntryDialog onAdd={onAdd} />
+        </div>
+        {/* Filters */}
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <Filter className="h-3.5 w-3.5" />
+            Filters
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">From</label>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={e => { setDateFrom(e.target.value); setSelectedMonth('all'); }}
+              className="h-8 w-36 text-xs"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">To</label>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={e => { setDateTo(e.target.value); setSelectedMonth('all'); }}
+              className="h-8 w-36 text-xs"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Month</label>
+            <Select value={selectedMonth} onValueChange={v => { setSelectedMonth(v); setDateFrom(''); setDateTo(''); }}>
+              <SelectTrigger className="h-8 w-36 text-xs">
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {monthOptions.map(m => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={clearFilters}>
+              Clear
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-0">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            <p className="text-sm">Ще немає записів. Додайте перший торговий день!</p>
+            <p className="text-sm">{entries.length === 0 ? 'No entries yet. Add your first trading day!' : 'No entries match the selected filters.'}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Дата</TableHead>
-                  <TableHead className="text-xs text-right">Прибуток ($)</TableHead>
+                  <TableHead className="text-xs">Date</TableHead>
+                  <TableHead className="text-xs text-right">Profit ($)</TableHead>
                   <TableHead className="text-xs text-right">%</TableHead>
-                  <TableHead className="text-xs text-right">Виведення ($)</TableHead>
-                  <TableHead className="text-xs text-right">Баланс</TableHead>
-                  <TableHead className="text-xs">Нотатки</TableHead>
+                  <TableHead className="text-xs text-right">Withdrawal ($)</TableHead>
+                  <TableHead className="text-xs text-right">Balance</TableHead>
+                  <TableHead className="text-xs">Notes</TableHead>
                   <TableHead className="text-xs w-20"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -111,7 +189,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                           value={editNotes}
                           onChange={e => setEditNotes(e.target.value)}
                           className="h-7 text-xs"
-                          placeholder="Нотатки..."
+                          placeholder="Notes..."
                         />
                       ) : (
                         <span className="text-muted-foreground">{entry.notes || '—'}</span>

@@ -27,7 +27,7 @@ export default function Index() {
   if (dataLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-muted-foreground animate-pulse">Завантаження даних...</div>
+        <div className="text-muted-foreground animate-pulse">Loading data...</div>
       </div>
     );
   }
