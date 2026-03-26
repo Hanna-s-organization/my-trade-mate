@@ -46,11 +46,11 @@ export default function TradingCharts({ entries, initialDeposit }: Props) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">Діаграми</h2>
+      <h2 className="text-lg font-semibold text-foreground">Charts</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="animate-fade-in card-elevated" style={{ animationDelay: '200ms' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Крива капіталу</CardTitle>
+            <CardTitle className="text-lg">Equity Curve</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[250px]">
@@ -74,7 +74,7 @@ export default function TradingCharts({ entries, initialDeposit }: Props) {
                       fontSize: 12,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Баланс']}
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Balance']}
                     labelStyle={{ color: textColor }}
                   />
                   <Area type="monotone" dataKey="balance" stroke={lineColor} fill="url(#balanceGrad)" strokeWidth={2} />
@@ -86,7 +86,7 @@ export default function TradingCharts({ entries, initialDeposit }: Props) {
 
         <Card className="animate-fade-in card-elevated" style={{ animationDelay: '250ms' }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Місячний прибуток</CardTitle>
+            <CardTitle className="text-lg">Monthly Profit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[250px]">
@@ -104,7 +104,7 @@ export default function TradingCharts({ entries, initialDeposit }: Props) {
                       fontSize: 12,
                       boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                     }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Прибуток']}
+                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Profit']}
                     labelStyle={{ color: textColor }}
                   />
                   <Bar dataKey="profit" radius={[4, 4, 0, 0]}>

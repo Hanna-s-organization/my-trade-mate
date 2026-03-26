@@ -23,33 +23,28 @@ export default function Auth() {
       if (mode === 'forgot') {
         const { error } = await resetPassword(email);
         if (error) throw error;
-        toast({ title: 'Лист надіслано', description: 'Перевірте свою пошту для відновлення паролю.' });
+        toast({ title: 'Email sent', description: 'Check your inbox for password reset instructions.' });
         setMode('login');
       } else if (mode === 'signup') {
         const { error } = await signUp(email, password);
         if (error) throw error;
-        toast({ title: 'Реєстрація успішна', description: 'Перевірте пошту для підтвердження акаунту.' });
+        toast({ title: 'Sign up successful', description: 'Check your email to confirm your account.' });
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
       }
     } catch (err: any) {
-      toast({ title: 'Помилка', description: err.message, variant: 'destructive' });
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const titles = {
-    login: 'Увійти',
-    signup: 'Реєстрація',
-    forgot: 'Відновити пароль',
-  };
-
+  const titles = { login: 'Login', signup: 'Sign Up', forgot: 'Reset Password' };
   const descriptions = {
-    login: 'Увійдіть до свого акаунту',
-    signup: 'Створіть новий акаунт',
-    forgot: 'Введіть email для відновлення',
+    login: 'Sign in to your account',
+    signup: 'Create a new account',
+    forgot: 'Enter your email to reset password',
   };
 
   return (
@@ -81,7 +76,7 @@ export default function Auth() {
             </div>
             {mode !== 'forgot' && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Пароль</label>
+                <label className="text-sm font-medium text-muted-foreground">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -104,23 +99,23 @@ export default function Auth() {
             {mode === 'login' && (
               <>
                 <button onClick={() => setMode('forgot')} className="text-primary hover:underline block w-full">
-                  Забули пароль?
+                  Forgot password?
                 </button>
                 <p className="text-muted-foreground">
-                  Немає акаунту?{' '}
-                  <button onClick={() => setMode('signup')} className="text-primary hover:underline">Реєстрація</button>
+                  Don't have an account?{' '}
+                  <button onClick={() => setMode('signup')} className="text-primary hover:underline">Sign Up</button>
                 </p>
               </>
             )}
             {mode === 'signup' && (
               <p className="text-muted-foreground">
-                Вже є акаунт?{' '}
-                <button onClick={() => setMode('login')} className="text-primary hover:underline">Увійти</button>
+                Already have an account?{' '}
+                <button onClick={() => setMode('login')} className="text-primary hover:underline">Login</button>
               </p>
             )}
             {mode === 'forgot' && (
               <button onClick={() => setMode('login')} className="text-primary hover:underline inline-flex items-center gap-1">
-                <ArrowLeft className="h-3 w-3" /> Назад до входу
+                <ArrowLeft className="h-3 w-3" /> Back to login
               </button>
             )}
           </div>

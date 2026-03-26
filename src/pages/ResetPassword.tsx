@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +20,10 @@ export default function ResetPassword() {
     try {
       const { error } = await updatePassword(password);
       if (error) throw error;
-      toast({ title: 'Пароль оновлено', description: 'Ваш пароль було успішно змінено.' });
+      toast({ title: 'Password updated', description: 'Your password has been changed successfully.' });
       navigate('/');
     } catch (err: any) {
-      toast({ title: 'Помилка', description: err.message, variant: 'destructive' });
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -36,13 +36,13 @@ export default function ResetPassword() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
             <TrendingUp className="h-7 w-7 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Новий пароль</CardTitle>
-          <CardDescription>Введіть новий пароль для вашого акаунту</CardDescription>
+          <CardTitle className="text-2xl font-bold">New Password</CardTitle>
+          <CardDescription>Enter a new password for your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Новий пароль</label>
+              <label className="text-sm font-medium text-muted-foreground">New Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -58,7 +58,7 @@ export default function ResetPassword() {
               </div>
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? '...' : 'Зберегти пароль'}
+              {loading ? '...' : 'Save Password'}
             </Button>
           </form>
         </CardContent>

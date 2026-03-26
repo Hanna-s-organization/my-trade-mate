@@ -50,12 +50,12 @@ export default function SummaryCards({ entries, currentBalance, initialDeposit }
   }, [entries, currentBalance, initialDeposit]);
 
   const cards = [
-    { label: 'Поточний баланс', value: `$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: Wallet, color: 'text-primary' },
-    { label: 'Виведення коштів', value: `$${stats.totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: ArrowDownFromLine, color: stats.totalWithdrawals > 0 ? 'text-warning' : 'text-muted-foreground' },
-    { label: 'Заробіток за день', value: formatUSD(stats.todayProfit), sub: formatPercent(stats.todayPercent), icon: Calendar, color: stats.todayProfit >= 0 ? 'text-success' : 'text-destructive' },
-    { label: 'Прибуток за місяць', value: formatUSD(stats.monthProfit), sub: formatPercent(stats.monthPercent), icon: BarChart3, color: stats.monthProfit >= 0 ? 'text-success' : 'text-destructive' },
-    { label: 'Прибуток за рік', value: formatUSD(stats.yearProfit), sub: formatPercent(stats.yearPercent), icon: TrendingUp, color: stats.yearProfit >= 0 ? 'text-success' : 'text-destructive' },
-    { label: 'Загальний результат', value: formatUSD(stats.totalProfit), sub: formatPercent(stats.totalPercent), icon: Target, color: stats.totalProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Current Balance', value: `$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: Wallet, color: 'text-primary' },
+    { label: 'Total Withdrawals', value: `$${stats.totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: ArrowDownFromLine, color: stats.totalWithdrawals > 0 ? 'text-warning' : 'text-muted-foreground' },
+    { label: 'Daily Profit', value: formatUSD(stats.todayProfit), sub: formatPercent(stats.todayPercent), icon: Calendar, color: stats.todayProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Monthly Profit', value: formatUSD(stats.monthProfit), sub: formatPercent(stats.monthPercent), icon: BarChart3, color: stats.monthProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Yearly Profit', value: formatUSD(stats.yearProfit), sub: formatPercent(stats.yearPercent), icon: TrendingUp, color: stats.yearProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Total Profit', value: formatUSD(stats.totalProfit), sub: formatPercent(stats.totalPercent), icon: Target, color: stats.totalProfit >= 0 ? 'text-success' : 'text-destructive' },
   ];
 
   return (

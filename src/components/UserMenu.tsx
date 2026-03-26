@@ -16,12 +16,12 @@ export default function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-3 py-2 border-b">
-          <p className="text-xs text-muted-foreground">Акаунт</p>
+          <p className="text-xs text-muted-foreground">Account</p>
           <p className="text-sm font-medium truncate">{user.email}</p>
         </div>
         <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
           <LogOut className="h-4 w-4 mr-2" />
-          Вийти
+          Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

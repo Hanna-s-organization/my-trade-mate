@@ -32,16 +32,12 @@ export default function SetupDeposit({ onSetup }: Props) {
             <TrendingUp className="h-7 w-7 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">Trading Tracker</CardTitle>
-          <CardDescription>
-            Відстежуйте свої торгові результати
-          </CardDescription>
+          <CardDescription>Track your trading performance</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
-                Початковий депозит ($)
-              </label>
+              <label className="text-sm font-medium text-muted-foreground">Initial Deposit ($)</label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -57,7 +53,7 @@ export default function SetupDeposit({ onSetup }: Props) {
               </div>
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={!amount || parseFloat(amount) <= 0}>
-              Почати
+              Get Started
             </Button>
           </form>
         </CardContent>
