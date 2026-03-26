@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import TradelyLogo from '@/components/TradelyLogo';
 
 type Mode = 'login' | 'signup' | 'forgot';
 
@@ -51,8 +52,9 @@ export default function Auth() {
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md animate-fade-in card-elevated">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-            <TrendingUp className="h-7 w-7 text-primary" />
+          <TradelyLogo size={56} showWordmark={false} className="mx-auto" />
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Tradely</p>
           </div>
           <CardTitle className="text-2xl font-bold">{titles[mode]}</CardTitle>
           <CardDescription>{descriptions[mode]}</CardDescription>

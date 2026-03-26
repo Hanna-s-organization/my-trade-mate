@@ -13,9 +13,21 @@ interface Props {
   onAdd: (date: string, profit: number, notes: string, withdrawal?: number) => void;
   onUpdate: (id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => void;
   onDelete: (id: string) => void;
+  showBalance: boolean;
+  showProfitAmounts: boolean;
 }
 
-export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Props) {
+function formatMonthOption(value: string) {
+  const [year, month] = value.split('-');
+  const date = new Date(Number(year), Number(month) - 1, 1);
+
+  return date.toLocaleString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+export default function EntriesTable({ entries, onAdd, onUpdate, onDelete, showBalance, showProfitAmounts }: Props) {
   const [editId, setEditId] = useState<string | null>(null);
   const [editProfit, setEditProfit] = useState('');
   const [editWithdrawal, setEditWithdrawal] = useState('');
@@ -80,7 +92,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
         </div>
         {/* Filters */}
         <div className="flex flex-wrap items-end gap-3">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <div className="flex h-8 items-center gap-1.5 text-xs font-medium text-muted-foreground self-end">
             <Filter className="h-3.5 w-3.5" />
             Filters
           </div>
@@ -111,7 +123,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 {monthOptions.map(m => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>{formatMonthOption(m)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -157,7 +169,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                         />
                       ) : (
                         <span className={`font-mono text-sm font-medium ${entry.profitAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                          {entry.profitAmount >= 0 ? '+' : ''}{entry.profitAmount.toFixed(2)}
+                          {showProfitAmounts ? `${entry.profitAmount >= 0 ? '+' : ''}${entry.profitAmount.toFixed(2)}` : '••••••'}
                         </span>
                       )}
                     </TableCell>
@@ -181,7 +193,7 @@ export default function EntriesTable({ entries, onAdd, onUpdate, onDelete }: Pro
                       )}
                     </TableCell>
                     <TableCell className="text-right font-mono text-xs text-foreground">
-                      ${entry.endingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {showBalance ? `$${entry.endingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '••••••'}
                     </TableCell>
                     <TableCell className="text-xs max-w-[200px] truncate">
                       {editId === entry.id ? (

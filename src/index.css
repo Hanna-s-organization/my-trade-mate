@@ -6,39 +6,39 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 25% 10%;
+    --background: 258 30% 97%;
+    --foreground: 258 22% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 258 22% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 258 22% 12%;
 
-    --primary: 220 70% 50%;
+    --primary: 254 89% 68%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 93%;
-    --secondary-foreground: 220 25% 10%;
+    --secondary: 258 28% 93%;
+    --secondary-foreground: 258 22% 12%;
 
-    --muted: 220 15% 93%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 258 24% 94%;
+    --muted-foreground: 257 15% 44%;
 
-    --accent: 220 15% 93%;
-    --accent-foreground: 220 25% 10%;
+    --accent: 258 24% 94%;
+    --accent-foreground: 258 22% 12%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 8 100% 67%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 69% 45%;
+    --success: 156 59% 48%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 30 87% 59%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 70% 50%;
+    --border: 257 26% 88%;
+    --input: 257 26% 88%;
+    --ring: 254 89% 68%;
 
     --radius: 0.75rem;
 
@@ -51,56 +51,56 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --chart-grid: 220 13% 91%;
-    --chart-text: 220 10% 46%;
+    --chart-grid: 257 26% 88%;
+    --chart-text: 257 15% 44%;
   }
 
   .dark {
-    --background: 222 28% 7%;
-    --foreground: 210 20% 92%;
+    --background: 258 23% 7%;
+    --foreground: 264 45% 96%;
 
-    --card: 222 22% 11%;
-    --card-foreground: 210 20% 92%;
+    --card: 246 12% 12%;
+    --card-foreground: 264 45% 96%;
 
-    --popover: 222 22% 11%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 246 12% 12%;
+    --popover-foreground: 264 45% 96%;
 
-    --primary: 217 70% 55%;
+    --primary: 254 89% 68%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 18% 16%;
-    --secondary-foreground: 210 20% 92%;
+    --secondary: 246 11% 17%;
+    --secondary-foreground: 264 45% 96%;
 
-    --muted: 222 18% 16%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 246 11% 17%;
+    --muted-foreground: 257 18% 67%;
 
-    --accent: 222 18% 16%;
-    --accent-foreground: 210 20% 92%;
+    --accent: 246 11% 17%;
+    --accent-foreground: 264 45% 96%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 8 100% 67%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 72% 50%;
+    --success: 156 59% 48%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 55%;
+    --warning: 30 92% 62%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 222 15% 18%;
-    --input: 222 15% 18%;
-    --ring: 217 70% 55%;
+    --border: 246 12% 21%;
+    --input: 246 12% 21%;
+    --ring: 254 89% 68%;
 
-    --chart-grid: 222 15% 20%;
-    --chart-text: 215 15% 55%;
+    --chart-grid: 246 12% 21%;
+    --chart-text: 257 18% 67%;
 
-    --sidebar-background: 222 28% 7%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 258 23% 7%;
+    --sidebar-foreground: 264 45% 96%;
+    --sidebar-primary: 254 89% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 18% 16%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 222 15% 18%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 246 11% 17%;
+    --sidebar-accent-foreground: 264 45% 96%;
+    --sidebar-border: 246 12% 21%;
+    --sidebar-ring: 254 89% 68%;
   }
 }
 
@@ -122,26 +122,26 @@
 
 @layer utilities {
   .dark .card-elevated {
-    box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(155, 123, 255, 0.08);
   }
 
   .card-elevated {
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 18px 40px -28px rgba(95, 68, 170, 0.22), 0 0 0 1px rgba(124, 92, 255, 0.04);
   }
 
   .dark tr:nth-child(even) td {
-    background-color: hsl(222, 22%, 9%);
+    background-color: hsl(246, 12%, 10%);
   }
 
   .dark tr:hover td {
-    background-color: hsl(222, 18%, 14%) !important;
+    background-color: hsl(246, 12%, 15%) !important;
   }
 
   tr:nth-child(even) td {
-    background-color: hsl(220, 20%, 96%);
+    background-color: hsl(258, 28%, 96%);
   }
 
   tr:hover td {
-    background-color: hsl(220, 15%, 93%) !important;
+    background-color: hsl(258, 28%, 92%) !important;
   }
 }

@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TradingProfile } from '@/lib/types';
-import { DollarSign, TrendingUp } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
+import TradelyLogo from './TradelyLogo';
 
 interface Props {
   onSetup: (profile: TradingProfile) => void;
@@ -28,11 +29,9 @@ export default function SetupDeposit({ onSetup }: Props) {
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md animate-fade-in card-elevated">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-            <TrendingUp className="h-7 w-7 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Trading Tracker</CardTitle>
-          <CardDescription>Track your trading performance</CardDescription>
+          <TradelyLogo size={56} showWordmark={false} className="mx-auto" />
+          <CardTitle className="text-2xl font-bold">Tradely</CardTitle>
+          <CardDescription>Track your trading performance with clarity</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

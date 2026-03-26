@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { Lock, TrendingUp } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import TradelyLogo from '@/components/TradelyLogo';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -33,9 +34,8 @@ export default function ResetPassword() {
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-md animate-fade-in card-elevated">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-            <TrendingUp className="h-7 w-7 text-primary" />
-          </div>
+          <TradelyLogo size={56} showWordmark={false} className="mx-auto" />
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Tradely</p>
           <CardTitle className="text-2xl font-bold">New Password</CardTitle>
           <CardDescription>Enter a new password for your account</CardDescription>
         </CardHeader>
