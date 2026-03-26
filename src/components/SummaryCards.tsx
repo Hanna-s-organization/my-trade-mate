@@ -49,39 +49,51 @@ export default function SummaryCards({ entries, currentBalance, initialDeposit }
     return { todayProfit, todayPercent, monthProfit, monthPercent, yearProfit, yearPercent, totalProfit, totalPercent, totalWithdrawals };
   }, [entries, currentBalance, initialDeposit]);
 
-  const rows = [
-    [
-      { label: 'Current Balance', value: `$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: Wallet, color: 'text-primary' },
-      { label: 'Total Withdrawals', value: `$${stats.totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: ArrowDownFromLine, color: stats.totalWithdrawals > 0 ? 'text-warning' : 'text-muted-foreground' },
-    ],
-    [
-      { label: 'Daily Profit', value: formatUSD(stats.todayProfit), sub: formatPercent(stats.todayPercent), icon: Calendar, color: stats.todayProfit >= 0 ? 'text-success' : 'text-destructive' },
-      { label: 'Monthly Profit', value: formatUSD(stats.monthProfit), sub: formatPercent(stats.monthPercent), icon: BarChart3, color: stats.monthProfit >= 0 ? 'text-success' : 'text-destructive' },
-    ],
-    [
-      { label: 'Yearly Profit', value: formatUSD(stats.yearProfit), sub: formatPercent(stats.yearPercent), icon: TrendingUp, color: stats.yearProfit >= 0 ? 'text-success' : 'text-destructive' },
-      { label: 'Total Profit', value: formatUSD(stats.totalProfit), sub: formatPercent(stats.totalPercent), icon: Target, color: stats.totalProfit >= 0 ? 'text-success' : 'text-destructive' },
-    ],
+  const balanceCards = [
+    { label: 'Current Balance', value: `$${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: Wallet, color: 'text-primary' },
+    { label: 'Total Withdrawals', value: `$${stats.totalWithdrawals.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, sub: '', icon: ArrowDownFromLine, color: stats.totalWithdrawals > 0 ? 'text-warning' : 'text-muted-foreground' },
   ];
+
+  const mainProfitCards = [
+    { label: 'Daily Profit', value: formatUSD(stats.todayProfit), sub: formatPercent(stats.todayPercent), icon: Calendar, color: stats.todayProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Monthly Profit', value: formatUSD(stats.monthProfit), sub: formatPercent(stats.monthPercent), icon: BarChart3, color: stats.monthProfit >= 0 ? 'text-success' : 'text-destructive' },
+  ];
+
+  const longTermCards = [
+    { label: 'Yearly Profit', value: formatUSD(stats.yearProfit), sub: formatPercent(stats.yearPercent), icon: TrendingUp, color: stats.yearProfit >= 0 ? 'text-success' : 'text-destructive' },
+    { label: 'Total Profit', value: formatUSD(stats.totalProfit), sub: formatPercent(stats.totalPercent), icon: Target, color: stats.totalProfit >= 0 ? 'text-success' : 'text-destructive' },
+  ];
+
+  const renderCard = (c: typeof balanceCards[0], i: number, large?: boolean) => (
+    <Card key={i} className="animate-fade-in card-elevated" style={{ animationDelay: `${i * 60}ms` }}>
+      <CardContent className={`${large ? 'p-5' : 'p-4'} space-y-2`}>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>
+          <c.icon className={`h-4 w-4 ${c.color}`} />
+        </div>
+        <p className={`${large ? 'text-2xl' : 'text-xl'} font-bold font-mono ${c.color}`}>{c.value}</p>
+        {c.sub && <p className="text-xs font-mono text-muted-foreground">{c.sub}</p>}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-4">
-      {rows.map((row, ri) => (
-        <div key={ri} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {row.map((c, ci) => (
-            <Card key={ci} className="animate-fade-in card-elevated" style={{ animationDelay: `${(ri * 2 + ci) * 60}ms` }}>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{c.label}</span>
-                  <c.icon className={`h-4 w-4 ${c.color}`} />
-                </div>
-                <p className={`text-xl font-bold font-mono ${c.color}`}>{c.value}</p>
-                {c.sub && <p className="text-xs font-mono text-muted-foreground">{c.sub}</p>}
-              </CardContent>
-            </Card>
-          ))}
+      {/* Top row: main profits (large) + balance cards on the right */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Daily & Monthly - prominent, left 2/3 */}
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {mainProfitCards.map((c, i) => renderCard(c, i, true))}
         </div>
-      ))}
+        {/* Balance & Withdrawals - right 1/3 */}
+        <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+          {balanceCards.map((c, i) => renderCard(c, i + 2))}
+        </div>
+      </div>
+      {/* Bottom row: yearly & total */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {longTermCards.map((c, i) => renderCard(c, i + 4))}
+      </div>
     </div>
   );
 }
