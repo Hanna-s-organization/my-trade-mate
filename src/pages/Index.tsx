@@ -15,7 +15,7 @@ export default function Index() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-muted-foreground animate-pulse">Завантаження...</div>
+        <div className="text-muted-foreground animate-pulse">Loading...</div>
       </div>
     );
   }
