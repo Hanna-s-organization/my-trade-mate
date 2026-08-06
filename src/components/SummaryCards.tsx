@@ -10,7 +10,9 @@ import {
   ArrowDownFromLine,
   ChevronDown,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+const LONG_TERM_PROFIT_STORAGE_KEY = 'tradely-long-term-profit-open';
 
 interface Props {
   entries: DailyEntry[];
@@ -37,14 +39,16 @@ function maskValue() {
 function Sparkline({
   values,
   colorClass,
+  large = false,
 }: {
   values: number[];
   colorClass: string;
+  large?: boolean;
 }) {
   if (values.length < 2) return null;
 
-  const width = 120;
-  const height = 36;
+  const width = large ? 148 : 120;
+  const height = large ? 46 : 36;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
@@ -54,24 +58,31 @@ function Sparkline({
     .map((value, index) => {
       const x = index * stepX;
       const y = height - ((value - min) / range) * (height - 8) - 4;
-      return `${x},${y}`;
-    })
-    .join(' ');
+      return { x, y };
+    });
+
+  const path = points.reduce((acc, point, index, arr) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+
+    const previous = arr[index - 1];
+    const controlX = (previous.x + point.x) / 2;
+    return `${acc} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+  }, '');
 
   return (
     <div className="pt-2">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className={`h-9 w-full max-w-[120px] ${colorClass}`}
+        className={`${large ? 'h-11 max-w-[148px]' : 'h-9 max-w-[120px]'} w-full ${colorClass}`}
         aria-hidden="true"
       >
-        <polyline
+        <path
           fill="none"
           stroke="currentColor"
           strokeWidth="2.25"
           strokeLinecap="round"
           strokeLinejoin="round"
-          points={points}
+          d={path}
           opacity="0.95"
         />
       </svg>
@@ -87,6 +98,17 @@ export default function SummaryCards({
   showProfitAmounts,
 }: Props) {
   const [showLongTermProfits, setShowLongTermProfits] = useState(true);
+
+  useEffect(() => {
+    const savedState = window.localStorage.getItem(LONG_TERM_PROFIT_STORAGE_KEY);
+    if (savedState !== null) {
+      setShowLongTermProfits(savedState === 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(LONG_TERM_PROFIT_STORAGE_KEY, String(showLongTermProfits));
+  }, [showLongTermProfits]);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -121,6 +143,11 @@ export default function SummaryCards({
     const totalProfit = entries.reduce((sum, entry) => sum + entry.profitAmount, 0);
     const totalPercent = initialDeposit > 0 ? (totalProfit / initialDeposit) * 100 : 0;
     const totalWithdrawals = entries.reduce((sum, entry) => sum + (entry.withdrawal || 0), 0);
+    const winningDays = entries.filter((entry) => entry.profitAmount > 0).length;
+    const losingDays = entries.filter((entry) => entry.profitAmount < 0).length;
+    const breakevenDays = entries.filter((entry) => entry.profitAmount === 0).length;
+    const decidedDays = winningDays + losingDays;
+    const dayWinRate = decidedDays > 0 ? (winningDays / decidedDays) * 100 : 0;
 
     return {
       todayProfit,
@@ -134,6 +161,10 @@ export default function SummaryCards({
       totalProfit,
       totalPercent,
       totalWithdrawals,
+      winningDays,
+      losingDays,
+      breakevenDays,
+      dayWinRate,
     };
   }, [entries, currentBalance, initialDeposit]);
 
@@ -177,6 +208,14 @@ export default function SummaryCards({
       color: 'text-warning',
     },
   ];
+
+  const dayWinRateCard = {
+    label: 'Day Win Rate',
+    value: `${stats.dayWinRate.toFixed(1)}%`,
+    sub: `${stats.winningDays}W / ${stats.losingDays}L / ${stats.breakevenDays}BE`,
+    icon: Target,
+    color: stats.dayWinRate >= 50 ? 'text-success' : 'text-warning',
+  };
 
   const mainProfitCards = [
     {
@@ -224,6 +263,7 @@ export default function SummaryCards({
     index: number,
     large?: boolean,
     sparklineValues?: number[],
+    sparklineLarge?: boolean,
   ) => (
     <Card
       key={index}
@@ -246,7 +286,7 @@ export default function SummaryCards({
         </p>
         {card.sub && <p className={`text-sm font-mono ${card.color}`}>{card.sub}</p>}
         {sparklineValues && sparklineValues.length > 1 && (
-          <Sparkline values={sparklineValues} colorClass={card.color} />
+          <Sparkline values={sparklineValues} colorClass={card.color} large={sparklineLarge} />
         )}
       </CardContent>
     </Card>
@@ -262,6 +302,7 @@ export default function SummaryCards({
               index,
               true,
               index === 0 ? sparklineData.dailyValues : sparklineData.weeklyValues,
+              index === 0,
             ),
           )}
         </div>
@@ -276,6 +317,10 @@ export default function SummaryCards({
             {balanceCards.map((card, index) => renderCard(card, index + 2))}
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {renderCard(dayWinRateCard, 20)}
       </div>
 
       <Collapsible open={showLongTermProfits} onOpenChange={setShowLongTermProfits} className="space-y-3">

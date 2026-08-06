@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TradingProfile } from '@/lib/types';
+import { parseDecimalInput } from '@/lib/parse-decimal';
 import { DollarSign } from 'lucide-react';
 import TradelyLogo from './TradelyLogo';
 
@@ -15,7 +16,7 @@ export default function SetupDeposit({ onSetup }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const val = parseFloat(amount);
+    const val = parseDecimalInput(amount);
     if (isNaN(val) || val <= 0) return;
     const profile: TradingProfile = {
       initialDeposit: val,
@@ -40,9 +41,8 @@ export default function SetupDeposit({ onSetup }: Props) {
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="1"
+                  type="text"
+                  inputMode="decimal"
                   placeholder="10000"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
@@ -51,7 +51,12 @@ export default function SetupDeposit({ onSetup }: Props) {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg" disabled={!amount || parseFloat(amount) <= 0}>
+            <Button
+              type="submit"
+              className="w-full"
+              size="lg"
+              disabled={!amount || isNaN(parseDecimalInput(amount)) || parseDecimalInput(amount) <= 0}
+            >
               Get Started
             </Button>
           </form>

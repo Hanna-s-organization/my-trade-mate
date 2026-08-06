@@ -1,30 +1,43 @@
+import { useEffect, useState } from 'react';
+import { BadgePercent, DollarSign, Eye, EyeOff, Settings, Trash2 } from 'lucide-react';
 import { TradingProfile, DailyEntry } from '@/lib/types';
 import SummaryCards from './SummaryCards';
 import TradingCharts from './TradingCharts';
 import EntriesTable from './EntriesTable';
+import AppHeader from './AppHeader';
 import ThemeToggle from './ThemeToggle';
 import UserMenu from './UserMenu';
-import TradelyLogo from './TradelyLogo';
 import { Button } from '@/components/ui/button';
-import { Settings, Trash2, DollarSign, Eye, EyeOff, BadgePercent } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { parseDecimalInput } from '@/lib/parse-decimal';
+
+const SETTINGS_DRAFT_KEY = 'tradely-settings-draft';
+const MASKED_VALUE = '******';
 
 interface Props {
   profile: TradingProfile;
   entries: DailyEntry[];
   currentBalance: number;
   onAddEntry: (date: string, profit: number, notes: string, withdrawal?: number) => void;
-  onUpdateEntry: (id: string, updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number }) => void;
+  onUpdateEntry: (
+    id: string,
+    updates: { profitAmount?: number; notes?: string; date?: string; withdrawal?: number },
+  ) => void;
   onDeleteEntry: (id: string) => void;
   onUpdateDeposit: (profile: TradingProfile) => void;
   onClearAll: () => void;
 }
 
 export default function Dashboard({
-  profile, entries, currentBalance,
-  onAddEntry, onUpdateEntry, onDeleteEntry, onUpdateDeposit, onClearAll
+  profile,
+  entries,
+  currentBalance,
+  onAddEntry,
+  onUpdateEntry,
+  onDeleteEntry,
+  onUpdateDeposit,
+  onClearAll,
 }: Props) {
   const [depositInput, setDepositInput] = useState(profile.initialDeposit.toString());
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -36,11 +49,39 @@ export default function Dashboard({
     if (savedBalance !== null) {
       setShowBalance(savedBalance === 'true');
     }
+
     const savedProfit = window.localStorage.getItem('show-profit-amounts');
     if (savedProfit !== null) {
       setShowProfitAmounts(savedProfit === 'true');
     }
+
+    const savedSettingsDraft = window.sessionStorage.getItem(SETTINGS_DRAFT_KEY);
+    if (!savedSettingsDraft) return;
+
+    try {
+      const parsed = JSON.parse(savedSettingsDraft) as {
+        open?: boolean;
+        depositInput?: string;
+      };
+
+      setSettingsOpen(Boolean(parsed.open));
+      if (parsed.depositInput) {
+        setDepositInput(parsed.depositInput);
+      }
+    } catch {
+      window.sessionStorage.removeItem(SETTINGS_DRAFT_KEY);
+    }
   }, []);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      SETTINGS_DRAFT_KEY,
+      JSON.stringify({
+        open: settingsOpen,
+        depositInput,
+      }),
+    );
+  }, [settingsOpen, depositInput]);
 
   const toggleBalanceVisibility = () => {
     setShowBalance((current) => {
@@ -59,22 +100,21 @@ export default function Dashboard({
   };
 
   const handleSaveDeposit = () => {
-    const val = parseFloat(depositInput);
+    const val = parseDecimalInput(depositInput);
     if (isNaN(val) || val <= 0) return;
+
     onUpdateDeposit({ ...profile, initialDeposit: val });
     setSettingsOpen(false);
+    window.sessionStorage.removeItem(SETTINGS_DRAFT_KEY);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TradelyLogo size={32} />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground font-mono hidden sm:block">
-              Deposit: {showBalance ? `$${profile.initialDeposit.toLocaleString()}` : '••••••'}
+      <AppHeader
+        actions={
+          <>
+            <span className="hidden font-mono text-xs text-muted-foreground sm:block">
+              Deposit: {showBalance ? `$${profile.initialDeposit.toLocaleString()}` : MASKED_VALUE}
             </span>
             <Button
               variant="ghost"
@@ -111,31 +151,33 @@ export default function Dashboard({
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Initial Deposit ($)</label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         value={depositInput}
-                        onChange={e => setDepositInput(e.target.value)}
+                        onChange={(e) => setDepositInput(e.target.value)}
                         className="pl-9 font-mono"
                       />
                     </div>
                   </div>
-                  <Button onClick={handleSaveDeposit} className="w-full">Save</Button>
-                  <div className="pt-4 border-t">
+                  <Button onClick={handleSaveDeposit} className="w-full">
+                    Save
+                  </Button>
+                  <div className="border-t pt-4">
                     <Button variant="destructive" size="sm" className="w-full" onClick={onClearAll}>
-                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Clear All Data
+                      <Trash2 className="mr-1 h-3.5 w-3.5" /> Clear All Data
                     </Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
             <UserMenu />
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto space-y-6 px-4 py-6">
         <SummaryCards
           entries={entries}
           currentBalance={currentBalance}
