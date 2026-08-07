@@ -12,6 +12,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const outcomeLabels: Record<TradeOutcome, string> = {
   win: 'Win',
@@ -126,7 +137,11 @@ export default function TradesPage() {
   };
 
   const deleteTrade = (id: string) => {
-    setEntries((current) => deriveTrades(current.filter((entry) => entry.id !== id)));
+    setEntries((current) => {
+      const nextEntries = deriveTrades(current.filter((entry) => entry.id !== id));
+      saveTrades(nextEntries);
+      return nextEntries;
+    });
   };
 
   if (loading) {
@@ -256,7 +271,10 @@ export default function TradesPage() {
                       <TableRow key={entry.id}>
                         <TableCell className="font-mono text-xs">{formatTradeDate(entry.date)}</TableCell>
                         <TableCell className="text-sm font-medium text-foreground">
-                          <Link to={`/trades/${entry.id}`} className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-4">
+                          <Link
+                            to={`/trades/${entry.id}`}
+                            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+                          >
                             {entry.trade || 'Open Trade'}
                             <ExternalLink className="h-3.5 w-3.5" />
                           </Link>
@@ -277,9 +295,27 @@ export default function TradesPage() {
                                 <ExternalLink className="h-4 w-4" />
                               </Link>
                             </Button>
-                            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteTrade(entry.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="max-w-sm rounded-2xl border-border/70 bg-card">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete this trade?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this trade from the journal? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteTrade(entry.id)}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </TableCell>
                       </TableRow>
