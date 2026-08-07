@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import {
   ArrowLeft,
@@ -18,17 +18,27 @@ import {
   TrendingUp,
   Waypoints,
 } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useBeforeUnload, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AppHeader from '@/components/AppHeader';
 import ThemeToggle from '@/components/ThemeToggle';
 import UserMenu from '@/components/UserMenu';
 import Auth from './Auth';
 import { useAuth } from '@/hooks/useAuth';
 import { AccountEntity, EntryByEntity, EntryTfEntity, PairEntity, SessionEntity, StyleEntity, TradeEntry } from '@/lib/types';
-import { deriveTrades, loadAccounts, loadEntryBy, loadEntryTf, loadPairs, loadSessions, loadStyles, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
+import { createEmptyTradeEntry, deriveTrades, loadAccounts, loadEntryBy, loadEntryTf, loadPairs, loadSessions, loadStyles, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
 import { parseDecimalInput } from '@/lib/parse-decimal';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -189,7 +199,9 @@ function TradeNoteCard({
 export default function TradeDetailsPage() {
   const { user, loading } = useAuth();
   const { tradeId } = useParams<{ tradeId: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  const isNewTrade = location.pathname === '/trades/new';
   const [accounts, setAccounts] = useState<AccountEntity[]>([]);
   const [pairs, setPairs] = useState<PairEntity[]>([]);
   const [styles, setStyles] = useState<StyleEntity[]>([]);
@@ -198,7 +210,11 @@ export default function TradeDetailsPage() {
   const [entryTfItems, setEntryTfItems] = useState<EntryTfEntity[]>([]);
   const [entries, setEntries] = useState<TradeEntry[]>([]);
   const [draft, setDraft] = useState<null | TradeDetailsDraft>(null);
+  const [initialDraftSnapshot, setInitialDraftSnapshot] = useState('');
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const allowNavigationRef = useRef(false);
+  const pendingNavigationRef = useRef<null | (() => void)>(null);
 
   useEffect(() => {
     setAccounts(loadAccounts());
@@ -209,9 +225,18 @@ export default function TradeDetailsPage() {
     setEntryTfItems(loadEntryTf());
     const nextEntries = loadTrades();
     setEntries(nextEntries);
+    if (isNewTrade) {
+      const emptyDraft = createDraft(createEmptyTradeEntry());
+      setDraft(emptyDraft);
+      setInitialDraftSnapshot(JSON.stringify(emptyDraft));
+      return;
+    }
+
     const currentTrade = nextEntries.find((entry) => entry.id === tradeId);
-    setDraft(currentTrade ? createDraft(currentTrade) : null);
-  }, [tradeId]);
+    const nextDraft = currentTrade ? createDraft(currentTrade) : null;
+    setDraft(nextDraft);
+    setInitialDraftSnapshot(nextDraft ? JSON.stringify(nextDraft) : '');
+  }, [isNewTrade, tradeId]);
 
   const trade = useMemo(() => entries.find((entry) => entry.id === tradeId) ?? null, [entries, tradeId]);
   const availableMainTrades = useMemo(() => entries.filter((entry) => entry.id !== tradeId), [entries, tradeId]);
@@ -231,13 +256,69 @@ export default function TradeDetailsPage() {
       deposit,
     });
   }, [draft?.risk, draft?.rrDollar, selectedAccount?.startingBalance]);
+  const hasUnsavedChanges = useMemo(() => {
+    if (!draft || !initialDraftSnapshot) return false;
+    return JSON.stringify(draft) !== initialDraftSnapshot;
+  }, [draft, initialDraftSnapshot]);
+
+  useBeforeUnload(
+    (event) => {
+      if (!hasUnsavedChanges || allowNavigationRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    },
+    { capture: true },
+  );
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || allowNavigationRef.current) return;
+
+    const handlePopState = () => {
+      pendingNavigationRef.current = () => navigate('/trades');
+      setLeaveDialogOpen(true);
+      window.history.pushState({ tradeGuard: true }, '', window.location.href);
+    };
+
+    window.history.pushState({ tradeGuard: true }, '', window.location.href);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [hasUnsavedChanges, navigate]);
+
+  const requestLeave = (action: () => void) => {
+    if (!hasUnsavedChanges || allowNavigationRef.current) {
+      action();
+      return;
+    }
+
+    pendingNavigationRef.current = action;
+    setLeaveDialogOpen(true);
+  };
+
+  const confirmLeave = () => {
+    allowNavigationRef.current = true;
+    const action = pendingNavigationRef.current;
+    pendingNavigationRef.current = null;
+    setLeaveDialogOpen(false);
+    action?.();
+  };
+
+  const stayOnPage = () => {
+    pendingNavigationRef.current = null;
+    setLeaveDialogOpen(false);
+  };
 
   const saveDetails = () => {
-    if (!trade || !draft) return;
+    if (!draft) return;
 
     const selectedPair = pairs.find((pair) => pair.id === draft.pairId);
+    const baseTrade = isNewTrade ? createEmptyTradeEntry() : trade;
+    if (!baseTrade) return;
+
     const nextTrade: TradeEntry = {
-      ...trade,
+      ...baseTrade,
       date: draft.date,
       account: selectedAccount?.name ?? '',
       accountId: selectedAccount?.id ?? '',
@@ -263,15 +344,22 @@ export default function TradeDetailsPage() {
       analysis: draft.analysis.trim(),
       mainTradeId: draft.mainTradeId || null,
       goodTrade: draft.goodTrade,
-      strategy: trade.strategy,
+      strategy: baseTrade.strategy,
       profitLoss: derivedMetrics.profitDollar,
       updatedAt: new Date().toISOString(),
     };
 
-    const nextEntries = deriveTrades(entries.map((entry) => (entry.id === trade.id ? nextTrade : entry)));
+    const nextEntries = deriveTrades(
+      isNewTrade
+        ? [nextTrade, ...entries]
+        : entries.map((entry) => (entry.id === baseTrade.id ? nextTrade : entry)),
+    );
     setEntries(nextEntries);
     saveTrades(nextEntries);
-    setDraft(createDraft(nextEntries.find((entry) => entry.id === trade.id) ?? nextTrade));
+    const nextDraft = createDraft(nextEntries.find((entry) => entry.id === nextTrade.id) ?? nextTrade);
+    setDraft(nextDraft);
+    setInitialDraftSnapshot(JSON.stringify(nextDraft));
+    allowNavigationRef.current = true;
     navigate('/trades');
   };
 
@@ -285,7 +373,7 @@ export default function TradeDetailsPage() {
 
   if (!user) return <Auth />;
 
-  if (!trade || !draft) {
+  if ((!trade && !isNewTrade) || !draft) {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader
@@ -324,10 +412,15 @@ export default function TradeDetailsPage() {
       <main className="container mx-auto max-w-6xl space-y-8 px-4 py-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <Link to="/trades" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-auto justify-start gap-2 px-0 text-sm text-muted-foreground hover:bg-transparent hover:text-foreground"
+              onClick={() => requestLeave(() => navigate('/trades'))}
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Trading Journal
-            </Link>
+            </Button>
             <h1 className="text-5xl font-semibold tracking-tight text-foreground">Trade</h1>
             <p className="text-sm text-muted-foreground">This page mirrors the Notion trade structure first, and then we will connect the rest of the logic step by step.</p>
           </div>
@@ -652,6 +745,26 @@ export default function TradeDetailsPage() {
           </div>
         </section>
       </main>
+
+      <AlertDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen}>
+        <AlertDialogContent className="max-w-md rounded-2xl border-border/70 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave without saving?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to leave? This trade has unsaved changes and they will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl" onClick={stayOnPage}>Stay</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmLeave}
+            >
+              Leave
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

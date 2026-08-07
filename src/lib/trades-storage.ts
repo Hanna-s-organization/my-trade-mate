@@ -142,6 +142,51 @@ export const DEFAULT_ENTRY_TF: EntryTfEntity[] = [
 
 export type TradeOutcome = TradeEntry['outcome'];
 
+export function createEmptyTradeEntry(): TradeEntry {
+  const now = new Date().toISOString();
+  const today = now.split('T')[0];
+
+  return {
+    id: crypto.randomUUID(),
+    date: today,
+    trade: 'Open Trade',
+    account: '',
+    accountId: '',
+    mainTradeId: null,
+    subTradeIds: [],
+    pairId: '',
+    pair: '',
+    outcome: 'in-progress',
+    risk: 0,
+    rrReal: 0,
+    rrDollar: 0,
+    profitPercent: 0,
+    profitDollar: 0,
+    allRr: 0,
+    allProfitPercent: 0,
+    allProfitDollar: 0,
+    goodTrade: false,
+    direction: 'long',
+    strategy: '',
+    style: '',
+    session: '',
+    entryTf: '',
+    entryBy: '',
+    description: '',
+    emotion: '',
+    timeframe1D: '',
+    timeframe4H: '',
+    entryNotes: '',
+    exitNotes: '',
+    analysis: '',
+    infoLine: '',
+    profitLoss: 0,
+    notes: '',
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 type LegacyTradeEntry = Partial<TradeEntry> & {
   id: string;
   date: string;

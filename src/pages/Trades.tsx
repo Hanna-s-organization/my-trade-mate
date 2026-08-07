@@ -7,7 +7,7 @@ import UserMenu from '@/components/UserMenu';
 import Auth from './Auth';
 import { useAuth } from '@/hooks/useAuth';
 import { TradeEntry } from '@/lib/types';
-import { deriveTrades, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
+import { loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,51 +47,6 @@ function formatSignedNumber(value: number) {
   return `${sign}${Math.abs(value).toFixed(2)}`;
 }
 
-function createEmptyTrade(): TradeEntry {
-  const now = new Date().toISOString();
-  const today = now.split('T')[0];
-
-  return {
-    id: crypto.randomUUID(),
-    date: today,
-    trade: 'Open Trade',
-    account: '',
-    accountId: '',
-    mainTradeId: null,
-    subTradeIds: [],
-    pairId: '',
-    pair: '',
-    outcome: 'in-progress',
-    risk: 0,
-    rrReal: 0,
-    rrDollar: 0,
-    profitPercent: 0,
-    profitDollar: 0,
-    allRr: 0,
-    allProfitPercent: 0,
-    allProfitDollar: 0,
-    goodTrade: false,
-    direction: 'long',
-    strategy: '',
-    style: '',
-    session: '',
-    entryTf: '',
-    entryBy: '',
-    description: '',
-    emotion: '',
-    timeframe1D: '',
-    timeframe4H: '',
-    entryNotes: '',
-    exitNotes: '',
-    analysis: '',
-    infoLine: '',
-    profitLoss: 0,
-    notes: '',
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
 export default function TradesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -129,11 +84,7 @@ export default function TradesPage() {
   }, [entries, search]);
 
   const openNewTrade = () => {
-    const nextTrade = createEmptyTrade();
-    const nextEntries = deriveTrades([nextTrade, ...entries]);
-    setEntries(nextEntries);
-    saveTrades(nextEntries);
-    navigate(`/trades/${nextTrade.id}`);
+    navigate('/trades/new');
   };
 
   const deleteTrade = (id: string) => {
