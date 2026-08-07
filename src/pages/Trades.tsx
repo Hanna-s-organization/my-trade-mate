@@ -7,7 +7,7 @@ import UserMenu from '@/components/UserMenu';
 import Auth from './Auth';
 import { useAuth } from '@/hooks/useAuth';
 import { TradeEntry } from '@/lib/types';
-import { loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
+import { deriveTrades, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
