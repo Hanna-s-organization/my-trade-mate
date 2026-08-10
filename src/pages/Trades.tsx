@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BarChart3, ExternalLink, Plus, Search, Trash2 } from 'lucide-react';
+import { BarChart3, CalendarRange, ExternalLink, Hourglass, Plus, Search, Target, Trash2, TrendingUp, Wallet } from 'lucide-react';
 import AppHeader from '@/components/AppHeader';
 import ThemeToggle from '@/components/ThemeToggle';
 import UserMenu from '@/components/UserMenu';
 import Auth from './Auth';
 import { useAuth } from '@/hooks/useAuth';
-import { TradeEntry } from '@/lib/types';
-import { deriveTrades, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
+import { AccountEntity, TradeEntry } from '@/lib/types';
+import { deriveTrades, loadAccounts, loadTrades, saveTrades, TradeOutcome } from '@/lib/trades-storage';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   AlertDialog,
@@ -32,6 +33,8 @@ const outcomeLabels: Record<TradeOutcome, string> = {
   missed: 'Missed',
 };
 
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 function formatTradeDate(value: string) {
   const [year, month, day] = value.split('-');
   return year && month && day ? `${day}-${month}-${year}` : value;
@@ -47,11 +50,36 @@ function formatSignedNumber(value: number) {
   return `${sign}${Math.abs(value).toFixed(2)}`;
 }
 
+function getAccountDisplayBalance(account: AccountEntity) {
+  return account.currentBalance > 0 ? account.currentBalance : account.startingBalance;
+}
+
 export default function TradesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<TradeEntry[]>(() => loadTrades());
+  const [accounts] = useState<AccountEntity[]>(() => loadAccounts());
   const [search, setSearch] = useState('');
+  const [statsView, setStatsView] = useState<'month' | 'quarter'>('month');
+
+  const availableYears = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        entries
+          .map((entry) => Number(entry.date.split('-')[0]))
+          .filter((value) => Number.isFinite(value)),
+      ),
+    ).sort((a, b) => b - a);
+
+    const currentYear = new Date().getFullYear();
+    return years.length > 0 ? years : [currentYear];
+  }, [entries]);
+
+  const today = new Date();
+  const [selectedYear, setSelectedYear] = useState<string>(String(availableYears[0] ?? today.getFullYear()));
+  const [selectedMonth, setSelectedMonth] = useState<string>(String(today.getMonth() + 1));
+
+  const selectedQuarter = useMemo(() => Math.ceil(Number(selectedMonth) / 3), [selectedMonth]);
 
   const stats = useMemo(() => {
     const closedTrades = entries.filter((entry) => entry.outcome === 'win' || entry.outcome === 'loss' || entry.outcome === 'breakeven');
@@ -67,6 +95,66 @@ export default function TradesPage() {
       netProfit,
     };
   }, [entries]);
+
+  const periodEntries = useMemo(() => {
+    const year = Number(selectedYear);
+    const month = Number(selectedMonth);
+
+    return entries.filter((entry) => {
+      const [entryYearRaw, entryMonthRaw] = entry.date.split('-');
+      const entryYear = Number(entryYearRaw);
+      const entryMonth = Number(entryMonthRaw);
+      if (entryYear !== year) return false;
+
+      if (statsView === 'month') {
+        return entryMonth === month;
+      }
+
+      const quarter = Math.ceil(entryMonth / 3);
+      return quarter === selectedQuarter;
+    });
+  }, [entries, selectedMonth, selectedQuarter, selectedYear, statsView]);
+
+  const periodStats = useMemo(() => {
+    const closedTrades = periodEntries.filter((entry) => entry.outcome === 'win' || entry.outcome === 'loss' || entry.outcome === 'breakeven');
+    const wins = closedTrades.filter((entry) => entry.outcome === 'win').length;
+    const losses = closedTrades.filter((entry) => entry.outcome === 'loss').length;
+    const breakeven = closedTrades.filter((entry) => entry.outcome === 'breakeven').length;
+    const missed = periodEntries.filter((entry) => entry.outcome === 'missed').length;
+    const winRate = closedTrades.length > 0 ? (wins / closedTrades.length) * 100 : 0;
+    const totalProfitDollar = periodEntries.reduce((sum, entry) => sum + entry.profitDollar, 0);
+    const totalProfitPercent = periodEntries.reduce((sum, entry) => sum + entry.profitPercent, 0);
+    const takenRr = periodEntries.reduce((sum, entry) => sum + entry.rrReal, 0);
+    const averageRr = periodEntries.length > 0 ? takenRr / periodEntries.length : 0;
+    const liveDeposit = accounts
+      .filter((account) => ['own deposit', 'live'].includes(account.phase.trim().toLowerCase()))
+      .reduce((sum, account) => sum + getAccountDisplayBalance(account), 0);
+    const propPayouts = accounts.reduce((sum, account) => sum + account.payout, 0);
+
+    return {
+      closedTrades: closedTrades.length,
+      wins,
+      losses,
+      breakeven,
+      missed,
+      winRate,
+      totalProfitDollar,
+      totalProfitPercent,
+      takenRr,
+      potentialRr: takenRr,
+      averageRr,
+      liveDeposit,
+      propPayouts,
+    };
+  }, [accounts, periodEntries]);
+
+  const periodLabel = useMemo(() => {
+    if (statsView === 'month') {
+      return `${monthNames[Number(selectedMonth) - 1]} ${selectedYear}`;
+    }
+
+    return `Q${selectedQuarter} ${selectedYear}`;
+  }, [selectedMonth, selectedQuarter, selectedYear, statsView]);
 
   const filteredEntries = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -157,6 +245,164 @@ export default function TradesPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className="card-elevated overflow-hidden">
+          <CardHeader className="space-y-5 border-b border-border/50 bg-gradient-to-br from-primary/10 via-background to-orange-500/10">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Month & Quarter Statistics</p>
+                <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">Period performance overview</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  This is the new summary block above the journal. It can later mirror the Notion `Month & Quarter Stat` more deeply.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-primary/20 bg-background/70 px-4 py-3 text-right shadow-sm">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Current view</p>
+                <p className="text-lg font-semibold text-foreground">{periodLabel}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-[170px_170px_170px_1fr]">
+              <Select value={statsView} onValueChange={(value: 'month' | 'quarter') => setStatsView(value)}>
+                <SelectTrigger className="h-11 rounded-xl border-border/60 bg-background/70">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-border/70 bg-card">
+                  <SelectItem value="month">Month View</SelectItem>
+                  <SelectItem value="quarter">Quarter View</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="h-11 rounded-xl border-border/60 bg-background/70">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-border/70 bg-card">
+                  {monthNames.map((monthName, index) => (
+                    <SelectItem key={monthName} value={String(index + 1)}>
+                      {monthName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="h-11 rounded-xl border-border/60 bg-background/70">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-border/70 bg-card">
+                  {availableYears.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center rounded-xl border border-border/60 bg-background/55 px-4 text-sm text-muted-foreground">
+                {statsView === 'month' ? `Quarter preview: Q${selectedQuarter}` : `Months in quarter: ${selectedQuarter * 3 - 2}-${selectedQuarter * 3}`}
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-5 p-5">
+            <div className="grid gap-4 lg:grid-cols-3">
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Wallet className="h-4 w-4 text-primary" />
+                    <p className="text-xs uppercase tracking-wide">Live Deposit</p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">${periodStats.liveDeposit.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Based on `Own deposit` and `Live` accounts</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <TrendingUp className="h-4 w-4 text-orange-400" />
+                    <p className="text-xs uppercase tracking-wide">Prop Payouts</p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">${periodStats.propPayouts.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Pulled from the current account payout totals</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CalendarRange className="h-4 w-4 text-primary" />
+                    <p className="text-xs uppercase tracking-wide">Trades | Profit</p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">
+                    {periodEntries.length} Trades | <span className={periodStats.totalProfitPercent >= 0 ? 'text-success' : 'text-destructive'}>{formatSignedNumber(periodStats.totalProfitPercent)}%</span>
+                  </p>
+                  <p className={`text-xs ${periodStats.totalProfitDollar >= 0 ? 'text-success' : 'text-destructive'}`}>{formatSignedCurrency(periodStats.totalProfitDollar)}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Target className="h-4 w-4 text-primary" />
+                    <p className="text-xs uppercase tracking-wide">Position WR</p>
+                  </div>
+                  <p className="font-mono text-2xl font-bold text-foreground">{periodStats.winRate.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">{periodStats.wins} wins / {periodStats.closedTrades} closed trades</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <BarChart3 className="h-4 w-4 text-orange-400" />
+                    <p className="text-xs uppercase tracking-wide">Taken | Potential RR</p>
+                  </div>
+                  <p className={`font-mono text-2xl font-bold ${periodStats.takenRr >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {formatSignedNumber(periodStats.takenRr)}RR | {formatSignedNumber(periodStats.potentialRr)}RR
+                  </p>
+                  <p className="text-xs text-muted-foreground">Potential RR can be refined later when we add more trade logic</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 bg-background/35 shadow-none">
+                <CardContent className="space-y-2 p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Hourglass className="h-4 w-4 text-primary" />
+                    <p className="text-xs uppercase tracking-wide">Average RR</p>
+                  </div>
+                  <p className={`font-mono text-2xl font-bold ${periodStats.averageRr >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {periodStats.averageRr >= 0 ? '~' : '-~'}{Math.abs(periodStats.averageRr).toFixed(2)}RR
+                  </p>
+                  <p className="text-xs text-muted-foreground">Average across all trades in the selected period</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-4">
+              <div className="rounded-2xl border border-border/50 bg-background/25 p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Wins</p>
+                <p className="mt-1 font-mono text-xl font-bold text-success">{periodStats.wins}</p>
+              </div>
+              <div className="rounded-2xl border border-border/50 bg-background/25 p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Losses</p>
+                <p className="mt-1 font-mono text-xl font-bold text-destructive">{periodStats.losses}</p>
+              </div>
+              <div className="rounded-2xl border border-border/50 bg-background/25 p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">BE</p>
+                <p className="mt-1 font-mono text-xl font-bold text-foreground">{periodStats.breakeven}</p>
+              </div>
+              <div className="rounded-2xl border border-border/50 bg-background/25 p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Missed</p>
+                <p className="mt-1 font-mono text-xl font-bold text-muted-foreground">{periodStats.missed}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="card-elevated">
           <CardHeader className="space-y-4">
