@@ -22,18 +22,7 @@ export function useTrading() {
   const [entries, setEntries] = useState<DailyEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load data from Supabase when user changes
-  useEffect(() => {
-    if (!user) {
-      setProfile(null);
-      setEntries([]);
-      setLoading(false);
-      return;
-    }
-    loadData();
-  }, [user]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
@@ -82,7 +71,18 @@ export function useTrading() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load data from Supabase when user changes
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      setEntries([]);
+      setLoading(false);
+      return;
+    }
+    loadData();
+  }, [user, loadData]);
 
   const saveProfile = useCallback(async (p: TradingProfile) => {
     if (!user) return;

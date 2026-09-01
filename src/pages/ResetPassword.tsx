@@ -8,6 +8,10 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import TradelyLogo from '@/components/TradelyLogo';
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'An unexpected error occurred.';
+}
+
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,8 +27,8 @@ export default function ResetPassword() {
       if (error) throw error;
       toast({ title: 'Password updated', description: 'Your password has been changed successfully.' });
       navigate('/');
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setLoading(false);
     }

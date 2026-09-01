@@ -9,6 +9,10 @@ import TradelyLogo from '@/components/TradelyLogo';
 
 type Mode = 'login' | 'signup' | 'forgot';
 
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'An unexpected error occurred.';
+}
+
 export default function Auth() {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -34,8 +38,8 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) throw error;
       }
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: getErrorMessage(err), variant: 'destructive' });
     } finally {
       setLoading(false);
     }
